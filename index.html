@@ -472,14 +472,42 @@
         }
 
         function downloadFull() {
-            const target = viewMode === '3d' ? document.getElementById('scene-3d') : document.getElementById('tray-view');
-            html2canvas(target, { scale: 2, useCORS: true, backgroundColor: null }).then(canvas => {
-                const a = document.createElement('a');
-                a.href = canvas.toDataURL();
-                a.download = 'la-dolce-vita.png';
-                a.click();
-            });
-        }
+    const target = viewMode === '3d' ? document.getElementById('scene-3d') : document.getElementById('tray-view');
+    
+    // Store original styles so we can restore them after the screenshot
+    const origMaxWidth = target.style.maxWidth;
+    const origOverflow = target.style.overflow;
+    const origWidth = target.style.width;
+
+    if (viewMode === 'tray') {
+        // Force the container to expand to its full hidden scroll width
+        target.style.maxWidth = 'none';
+        target.style.overflow = 'visible';
+        target.style.width = target.scrollWidth + 'px';
+    }
+
+    // A tiny 50ms delay gives the phone browser time to apply the width change before capturing
+    setTimeout(() => {
+        html2canvas(target, { 
+            scale: 2, 
+            useCORS: true, 
+            backgroundColor: null 
+        }).then(canvas => {
+            const a = document.createElement('a');
+            a.href = canvas.toDataURL();
+            a.download = 'la-dolce-vita-bracelet.png';
+            a.click();
+            
+            // Revert back to the normal constrained mobile view
+            if (viewMode === 'tray') {
+                target.style.maxWidth = origMaxWidth;
+                target.style.overflow = origOverflow;
+                target.style.width = origWidth;
+            }
+        });
+    }, 50);
+}
+
 
         function setup3DControls() {
             let isDown = false, sx, sy, rx = -30, ry = 0;
